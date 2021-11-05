@@ -1,49 +1,43 @@
-import random
-import math
-import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
-from matplotlib import cm
-from surface import create_surfacetopo, surfacetopo_3d
-from fibers import create_gdltopo, gdltopo_3d
+from surface import create_surfacetopo, surfacetopo_3d, surface_crosssection_2d
+from fibers import create_gdltopo, gdltopo_3d, gdltopo_2d, gdlpeaks_2d, gdl_crosssection_2d
+from microcontacts import find_microcontacts, microcontacts_2d
+from ecr import calc_ecr
+from pymongo import MongoClient
 
+# initialize mongo connector object with ip adress
+client = MongoClient('zbts07')
+# get reference to existing database testDB
+db = client.testDB
+# reference collection, if not existent it will be created
+current_collection = db['NMT_TestCollection']
+# authentication within database
+db.authenticate('jkp', 'qwertz', source='admin')
+
+# main parameters
 res = 1000 #µm/mm
-
 area = 0.01 #mm2
-
 pressure = 1 #MPa
 
-topo_params = {'d_peak': 200, 'r1': 2, 'sigma_s': 5} #TODO: add units
+surface_params = {'d_peak [1/mm]': 200, 'r1 [µm]': 3.67, 'sigma_s [µm]': 3.55}
 gdl_params = {'gdl_thk [µm]': 110, 'porosity': 0.7, 'fiber_dia [µm]': 7, 'binder_thk [µm]': 6}
 
-surface, surface_peaks = create_surfacetopo(res, area, topo_params)
-surfacetopo_3d(surface)
+gdl_mat_props = {'el. res. [µOhm*m]': 800}
+surface_mat_props = {'el. res. [µOhm*m]': 190}
 
-gdl, gdl_peaks = create_gdltopo(res, area, gdl_params)
+surface, surface_peaks, surface_data = create_surfacetopo(res, area, surface_params)
+surfacetopo_3d(surface_peaks)
+surface_crosssection_2d(surface_peaks, 50)
+
+gdl, gdl_peaks, gdl_fibers = create_gdltopo(res, area, gdl_params)
 gdltopo_3d(gdl)
+gdltopo_2d(gdl_fibers)
+gdlpeaks_2d(gdl_peaks)
+gdl_crosssection_2d(gdl, 50)
 
-distance_max = (gdl_params['fiber_dia [µm]'] / 2) + topo_params['r1'] + topo_params['sigma_s']
-distance_z = distance_max * ((10-pressure)/10) #TODO: find relation pressure <--> distance
+mcs, mcs_surface, mcs_gdl = find_microcontacts(gdl_params, surface_params, surface_peaks, gdl_peaks)
+microcontacts_2d(mcs_surface)
 
-n_contacts = 0
-contacts = []
-distance_2d = 0
-nearest = 10000
+calc_ecr(gdl_params, surface_params, surface_mat_props, gdl_mat_props, mcs)
 
-for i in surface_peaks:
-    if nearest < 10000:
-        contacts.append(nearest_i + nearest_j)
-    nearest = 10000
-    for j in gdl_peaks:
-        delta_x = abs(j[0] - i[0])
-        delta_y = abs(j[1] - i[1])
-        asperity_height = i[2] - topo_params['r1']
-        distance_2d = math.sqrt(delta_x ** 2 + delta_y ** 2)
-        distance_3d = math.sqrt(distance_2d ** 2 + (distance_z - asperity_height) ** 2)
-        if distance_3d < distance_max:
-            n_contacts += 0
-            if distance_2d < nearest:
-                nearest = distance_2d
-                nearest_i = i
-                nearest_j = j
 
-print(contacts)
+

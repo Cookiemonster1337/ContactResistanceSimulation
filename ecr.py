@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot as plt
 
 contact_area_x = 1000 #µm
 contact_area_y = 1000 #µm
@@ -30,3 +31,40 @@ con_area = math.pi * asperity_r * (math.sqrt(fiber_r/(asperity_r + fiber_r))) * 
 con_area_r = math.sqrt(con_area / math.pi)
 
 ecr = (res_bp + res_gdl) / (4 * con_area_r)
+
+
+def calc_ecr(gdl_params, topo_params, surface_mat_props, gdl_mat_props, mcs):
+    mc_ecr = []
+    ecr_series = []
+
+    distance_max = (gdl_params['fiber_dia [µm]'] / 2) + topo_params['r1 [µm]'] + topo_params['sigma_s [µm]']
+    z_distance = [i for i in range(1, int(distance_max + 1))]
+
+    for pressure in mcs:
+        for mc in pressure:
+            deformation = mc
+
+            con_area = math.pi * topo_params['r1 [µm]'] * \
+                       (math.sqrt((gdl_params['fiber_dia [µm]'] / 2) / (topo_params['r1 [µm]'] +
+                                                                        (gdl_params[
+                                                                             'fiber_dia [µm]'] / 2)))) * deformation
+
+            con_area_r = math.sqrt(con_area / math.pi)
+
+            ecr = (surface_mat_props['el. res. [µOhm*m]'] + gdl_mat_props['el. res. [µOhm*m]']) / (
+                        4 * (con_area_r * 10 ** -6))
+
+            mc_ecr.append(ecr)
+
+        area_ecr = 0
+        for i in mc_ecr:
+            area_ecr += (1 / i)
+        area_ecr = (area_ecr ** -1) * 10 ** -3  # mOhm
+
+        ecr_series.append(round(area_ecr, 2))
+
+    print(ecr_series)
+
+    plt.plot(z_distance, ecr_series)
+
+    plt.show()

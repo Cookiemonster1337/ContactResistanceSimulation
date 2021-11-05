@@ -22,31 +22,31 @@ def create_gdltopo(res, area, gdl_params):
 
     mesh = [[x, y, 0] for x in range(0, digits_xy) for y in range(0, digits_xy)]
 
-    gdl_coords = []
+    gdl_fibers = []
     gdl_peaks = []
     fiber_len = int(layer_fiber_len * 1 * 10 ** 6)
     r = gdl_params['fiber_dia [µm]'] / 2
 
     def fiber_coords_y(datapoint):
-        gdl_coords.append(datapoint)
+        gdl_fibers.append(datapoint)
         gdl_peaks.append(datapoint)
         for i in range(1, int(r) + 1):
             z = round(math.sin(math.acos(i / r)) * r, 2)
             datapoint_up = [datapoint[0], datapoint[1] + i, z]
-            gdl_coords.append(datapoint_up)
+            gdl_fibers.append(datapoint_up)
             datapoint_down = [datapoint[0], datapoint[1] - i, z]
-            gdl_coords.append(datapoint_down)
+            gdl_fibers.append(datapoint_down)
 
 
     def fiber_coords_x(datapoint):
-        gdl_coords.append(datapoint)
+        gdl_fibers.append(datapoint)
         gdl_peaks.append(datapoint)
         for i in range(1, int(r) + 1):
             z = round(math.sin(math.acos(i / r)) * r, 2)
             datapoint_up = [datapoint[0] + i, datapoint[1], z]
-            gdl_coords.append(datapoint_up)
+            gdl_fibers.append(datapoint_up)
             datapoint_down = [datapoint[0] - i, datapoint[1], z]
-            gdl_coords.append(datapoint_down)
+            gdl_fibers.append(datapoint_down)
 
 
     def fiber_path(p, direction, fiber_len):
@@ -110,7 +110,7 @@ def create_gdltopo(res, area, gdl_params):
             direction = random.randint(0, 3)
             fiber_len = fiber_path(p, direction, fiber_len)
 
-    gdl_coords_xy = [i[:2] for i in gdl_coords]
+    gdl_coords_xy = [i[:2] for i in gdl_fibers]
     print(len(gdl_coords_xy))
 
     mesh = []
@@ -122,8 +122,8 @@ def create_gdltopo(res, area, gdl_params):
             progress += 1
         print(str(round((progress / res ** 2) * 100, 0)) + '%')
 
-    gdltopo = mesh + gdl_coords
-    return gdltopo, gdl_peaks
+    gdltopo = mesh + gdl_fibers
+    return gdltopo, gdl_peaks, gdl_fibers
 
 def gdltopo_3d(gdltopo):
     X_3d = []
@@ -148,5 +148,66 @@ def gdltopo_3d(gdltopo):
     ax.set_zlabel('µm')
 
     ax.set_zlim(0, 50)
+
+    plt.show()
+
+def gdltopo_2d(gdl):
+
+    X_2d_fiber = []
+    Y_2d_fiber = []
+
+    for data in gdl:
+        X_2d_fiber.append(data[0])
+        Y_2d_fiber.append(data[1])
+
+    plt.scatter(X_2d_fiber, Y_2d_fiber, 0.1)
+
+    plt.title("fiber - coordinates")
+    plt.xlabel("µm")
+    plt.ylabel("µm")
+
+    plt.show()
+
+def gdlpeaks_2d(gdl_peaks):
+
+    X_2d_center = []
+    Y_2d_center = []
+
+    for data in gdl_peaks:
+        X_2d_center.append(data[0])
+        Y_2d_center.append(data[1])
+
+    plt.scatter(X_2d_center, Y_2d_center, 0.1)
+
+    plt.title("fiber(center) - coordinates")
+    plt.xlabel("µm")
+    plt.ylabel("µm")
+
+    plt.show()
+
+def gdl_crosssection_2d(gdl, xpos):
+    crosssection = []
+    Y_2d = []
+    Z_2d = []
+
+    for data in gdl:
+        if data[0] == xpos:
+            crosssection.append([data[1], data[2]])
+
+    print(crosssection)
+    crosssection.sort()
+    print(crosssection)
+
+    for data in crosssection:
+        Y_2d.append(data[0])
+        Z_2d.append(data[1])
+
+    plt.ylim(0, 20)
+    plt.plot(Y_2d, Z_2d, 0.1)
+
+
+    plt.title("cross section @xpos: " + str(xpos) + 'µm')
+    plt.xlabel("µm")
+    plt.ylabel("µm")
 
     plt.show()
