@@ -67,7 +67,7 @@ def create_surfacetopo(res, area, surface_params):
                                 [peak[0] - i, peak[1] + a, z], [peak[0] - i, peak[1] - a, z],
                                 [peak[0] + a, peak[1] + i, z], [peak[0] - a, peak[1] + i, z],
                                 [peak[0] + a, peak[1] - i, z], [peak[0] - a, peak[1] - i, z]]
-            for coord in peaks_3d:  #TODO: review way of processing data
+            for coord in peaks_3d: #TODO: review way of processing data
                 surface_peaks.append(coord)
     end = timer()
     print('peak-height generated!' + '(' + str(round(end-start, 2)) + 's)')
@@ -109,6 +109,8 @@ def create_surfacetopo(res, area, surface_params):
     db.authenticate('jkp', 'qwertz', source='admin')
 
     current_collection.insert_one(surface_data)
+
+    print(surface_df)
 
     return surface, surface_peaks, surface_data
 

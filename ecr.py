@@ -63,8 +63,9 @@ def calc_ecr(gdl_params, topo_params, surface_mat_props, gdl_mat_props, mcs):
 
         ecr_series.append(round(area_ecr, 2))
 
-    print(ecr_series)
+    return ecr_series, z_distance
 
+def plot_ecr(ecr_series, z_distance):
     plt.plot(z_distance, ecr_series)
 
     plt.show()
