@@ -18,30 +18,36 @@ res = 1000 #µm/mm
 area = 0.01 #mm2
 pressure = 1 #MPa
 
-surface_params = {'d_peak [1/mm]': 100, 'r1 [µm]': 3.67, 'sigma_s [µm]': 3.55}
+surface_params = {'d_peak [1/mm]': 98, 'r1 [µm]': 3.67, 'sigma_s [µm]': 3.55}
 gdl_params = {'gdl_thk [µm]': 110, 'porosity': 0.7, 'fiber_dia [µm]': 7, 'binder_thk [µm]': 6}
 
 gdl_mat_props = {'el. res. [µOhm*m]': 800}
 surface_mat_props = {'el. res. [µOhm*m]': 190}
 
-surface, surface_peaks, surface_data = create_surfacetopo(res, area, surface_params)
-surfacetopo_3d(surface, 50)
+spacing = 10
+
+# surface, surface_peaks, surface_data, surface_mean_summit = create_surfacetopo(res, area, surface_params)
+# surfacetopo_3d(res, surface, 50)
 
 #surface_crosssection_2d(surface_peaks, 50)
 
 gdl, gdl_peaks, gdl_fibers = create_gdltopo(res, area, gdl_params)
+
+gdlpeaks_2d(gdl_peaks)
+gdltopo_3d(res, gdl, 50)
+
 # gdltopo_2d(gdl_fibers)
 # gdlpeaks_2d(gdl_peaks)
 # gdl_crosssection_2d(gdl, 50)
 
-mcs, mcs_surface, mcs_gdl = find_microcontacts(gdl_params, surface_params, surface_peaks, gdl_peaks)
+# mcs, mcs_surface, mcs_gdl = find_microcontacts(gdl_params, surface_params, surface_mean_summit, gdl_peaks, spacing)
 # microcontacts_2d(mcs_surface)
-
-ecr, z_distance = calc_ecr(gdl_params, surface_params, surface_mat_props, gdl_mat_props, mcs)
-
-
-gdltopo_3d(gdl)
-plot_ecr(ecr, z_distance)
+#
+# ecr, z_distance = calc_ecr(gdl_params, surface_params, surface_mat_props, gdl_mat_props, mcs)
+#
+#
+#
+# plot_ecr(ecr, z_distance)
 
 
 

@@ -34,12 +34,17 @@ ecr = (res_bp + res_gdl) / (4 * con_area_r)
 
 
 def calc_ecr(gdl_params, topo_params, surface_mat_props, gdl_mat_props, mcs):
+    # define arrays for microcontacts (mc) and electrical contact resistances (ecr)
     mc_ecr = []
     ecr_series = []
 
+    # determinate max-distance between gdl- and surface-baselayer in which ecr calculation is still relevant
     distance_max = (gdl_params['fiber_dia [µm]'] / 2) + topo_params['r1 [µm]'] + topo_params['sigma_s [µm]']
+
+    # generate 1D array of distances - 1µm and max_distance between baselayer of surface and gdl
     z_distance = [i for i in range(1, int(distance_max + 1))]
 
+    # find overlapping/contacting (microcontacts) areas by comparing z-axis values of gdl and surface for different z-distances (pressures)
     for pressure in mcs:
         for mc in pressure:
             deformation = mc
