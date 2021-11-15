@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 
 
-def create_surfacetopo(res, area, surface_params):
+def create_surfacetopo(mdb, res, area, surface_params):
 
     r1 = surface_params['r1 [µm]']
     dpeak = surface_params['d_peak [1/mm]']
@@ -110,123 +110,40 @@ def create_surfacetopo(res, area, surface_params):
     filename = 'surface_' + str(surface_params['d_peak [1/mm]']) + '_' + str(surface_params['r1 [µm]']) + '_' + str(surface_params['sigma_s [µm]']) + '.csv'
     surface_df.to_csv('data/surface/' + filename, sep='\t')
 
-    # initialize mongo connector object with ip adress
-    client = MongoClient('zbts07')
-    # get reference to existing database testDB
-    db = client.testDB
-    # reference collection, if not existent it will be created
-    current_collection = db['NMT_TestCollection']
-    # authentication within database
-    db.authenticate('jkp', 'qwertz', source='admin')
+    if mdb == 'on':
+        # # initialize mongo connector object with ip adress
+        # client = MongoClient('zbts07')
+        # # get reference to existing database testDB
+        # db = client.testDB
+        # # reference collection, if not existent it will be created
+        # current_collection = db['NMT_TestCollection']
+        # # authentication within database
+        # db.authenticate('jkp', 'qwertz', source='admin')
 
-    current_collection.insert_one(surface_data)
+        current_collection.insert_one(surface_data)
 
     return surface, surface_peaks, surface_data, surface_mean_summit
 
-# def create_surfacetopo(res, area, surface_params):
-#
-#     # length x,y axis
-#     length_xy = math.sqrt(area)
-#     # datapoints along single axis element
-#     digits_xy = int(res * length_xy + 1)
-#
-#     # xy-basis-mesh
-#     mesh_basis = [[x, y] for x in range(digits_xy) for y in range(digits_xy)] #TODO: speed up possibilities?
-#
-#     # initalize peakdata-list
-#     peaks_2d = []
-#     # get no. of peaks
-#     peak_no = int((surface_params['d_peak [1/mm]'] * length_xy) ** 2)
-#
-#     # generate peaks (origin and area) !only xy-coordinates
-#     print('start peak-randomization...')
-#     start = timer()
-#     for i in range(peak_no + 1):
-#         peak = random.choice(mesh_basis)    # set random coordinates for peak origin
-#         peaks_2d.append(peak)  # add peak coordinates to list
-#         # determine xy-area of peak depending on asperity radius
-#         peak_xrange = range(peak[0] - int(surface_params['r1 [µm]']), peak[0] + int(surface_params['r1 [µm]'] + 1))
-#         peak_yrange = range(peak[1] - int(surface_params['r1 [µm]']), peak[1] + int(surface_params['r1 [µm]'] + 1))
-#         peak_square = [[x, y] for x in peak_xrange for y in peak_yrange]
-#         # add xy-area of peak to mesh-baselayer
-#         mesh_basis = [xy for xy in mesh_basis if xy not in peak_square]
-#         # clear peakdata for next loop
-#         peak_square.clear()
-#     end = timer()
-#     print('peak-positions generated!' + '(' + str(round(end-start, 2)) + 's)')
-#     # mesh for 3d data (x,y,z)
-#     surface_peaks = []
-#
-#     # generate random z-coordinate in given range (sigma_s, r1) for every peak
-#     print('start peak-height determination')
-#     start = timer()
-#     for peak in peaks_2d:
-        # find random height (z-coordinate) within given range defined by sigma_s and r1
-        # h = round(random.uniform(surface_params['r1 [µm]'] - (surface_params['sigma_s [µm]'] / 2), surface_params['r1 [µm]'] +
-        #                          (surface_params['sigma_s [µm]'] / 2)), 2)
-#         # add 3D-peak-coordinate (x,y,z) of !peak-origin to surface-mesh
-#         surface_peaks.append([peak[0], peak[1], h])
-#         # generate spherical shape of whole peak over corresponding peak-area
-#         for i in range(1, int(h)): #TODO: +1?
-#             # calculate z-coordinate corresponding to lateral distance between i and peak-origin (spherical shape)
-#             z = round(math.sin(math.acos(i / h)) * h, 2)
-#             # create surface mesh of single peak with resulting datapoints (surrounding peak-origin)
-#             peaks_3d = [[peak[0] - i, peak[1], z], [peak[0] + i, peak[1], z], [peak[0], peak[1] - i, z],
-#                       [peak[0], peak[1] + i, z],
-#                       [peak[0] + 1, peak[1] + i, z], [peak[0] + i, peak[1] - i, z], [peak[0] - i, peak[1] + i, z],
-#                       [peak[0] - i, peak[1] - i, z]]
-#             # for every additional digit-step away from peak-origin more datapoints (greater surroundings) need to be added
-#             if i > 1:
-#                 for a in range(1, i):
-#                     peaks_3d += [[peak[0] + i, peak[1] + a, z], [peak[0] + i, peak[1] - a, z],
-#                                 [peak[0] - i, peak[1] + a, z], [peak[0] - i, peak[1] - a, z],
-#                                 [peak[0] + a, peak[1] + i, z], [peak[0] - a, peak[1] + i, z],
-#                                 [peak[0] + a, peak[1] - i, z], [peak[0] - a, peak[1] - i, z]]
-#             for coord in peaks_3d: #TODO: review way of processing data
-#                 surface_peaks.append(coord)
-#     end = timer()
-#     print('peak-height generated!' + '(' + str(round(end-start, 2)) + 's)')
-#
-#     print('generate empty mesh...')
-#     start = timer()
-#     # xy-data of mesh_surface
-#     mesh_surface_xy = [i[:2] for i in surface_peaks]
-#     end = timer()
-#     print('empty mesh generated!' + '(' + str(round(end-start, 2)) + 's)')
-#
-#     # fill mesh_surface with 0-level
-#     start = timer()
-#     print('start filling surface mesh...')
-#     surface = []
-#     for x in range(digits_xy):
-#         for y in range(digits_xy):
-#             if [x, y] not in mesh_surface_xy:
-#                 surface.append([x, y, 0])
-#     surface = surface + surface_peaks
-#     end = timer()
-#     print('surface successfully generated!' + '(' + str(round(end-start, 2)) + 's)')
-#
-#     # surface-data-dictionary
-#     surface_data = {'area [mm^2]': area, 'xy-length [mm]': length_xy, 'xy-datapoints [#]': digits_xy,
-#                     'peaks [#]': peak_no, 'peaks [x,y,z]': surface_peaks, 'surface [x,y,z]': surface}
-#
-#     surface_df = pd.DataFrame(surface, columns=['x_val', 'y_val', 'z_val'])
-#     filename = 'surface_' + str(surface_params['d_peak [1/mm]']) + '_' + str(surface_params['r1 [µm]']) + '_' + str(surface_params['sigma_s [µm]']) + '.csv'
-#     surface_df.to_csv('data/surface/' + filename, sep='\t')
-#
-#     # initialize mongo connector object with ip adress
-#     client = MongoClient('zbts07')
-#     # get reference to existing database testDB
-#     db = client.testDB
-#     # reference collection, if not existent it will be created
-#     current_collection = db['NMT_TestCollection']
-#     # authentication within database
-#     db.authenticate('jkp', 'qwertz', source='admin')
-#
-#     current_collection.insert_one(surface_data)
-#
-#     return surface, surface_peaks, surface_data
+def surfacepeaks_2d(res, surface_peaks, zlim):
+    start = timer()
+    print('2d plotting...')
+    X_2d = []
+    Y_2d = []
 
+    for data in surface_peaks:
+        X_2d.append(data[0])
+        Y_2d.append(data[1])
+
+    end = timer()
+    print('2d plot generated!' + '(' + str(round(end - start, 2)) + 's)')
+
+    plt.scatter(X_2d, Y_2d, 0.1)
+
+    plt.title("asperity - coordinates")
+    plt.xlabel("µm")
+    plt.ylabel("µm")
+
+    plt.show()
 
 def surfacetopo_3d(res, surfacetopo, zlim):
     start = timer()
@@ -271,7 +188,7 @@ def surfacetopo_3d(res, surfacetopo, zlim):
 
     X, Y = np.meshgrid(xi, yi)
 
-    Z = griddata((X_3d, Y_3d), Z_3d, (X, Y), method='cubic')
+    Z = griddata((X_3d, Y_3d), Z_3d, (X, Y), method='nearest')
 
     # plt.pcolormesh(X, Y, Z)
     # plt.show()

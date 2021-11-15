@@ -407,7 +407,7 @@ def gdltopo_3d(res, gdltopo, zlim):
 
     X, Y = np.meshgrid(xi, yi)
 
-    Z = griddata((X_3d, Y_3d), Z_3d, (X, Y), method='linear')
+    Z = griddata((X_3d, Y_3d), Z_3d, (X, Y), method='nearest')
 
     plt.pcolormesh(X, Y, Z)
     plt.show()
