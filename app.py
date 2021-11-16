@@ -12,6 +12,9 @@ def dashplot(fig):
 
     app.layout = html.Div([
         html.Div(['d_peak', dcc.Input(id='d_peak', value=98, type='int')]),
+        html.Div(['d_peak', dcc.Input(id='d_peak', value=98, type='number')]),
+        html.Div(['r1', dcc.Input(id='r1', value=3.67, type='number')]),
+        html.Div(['sigma_s', dcc.Input(id='sigma_s', value=3.55, type='number')]),
         dcc.Graph(id='Surface Simulation', figure=fig)
     ])
 

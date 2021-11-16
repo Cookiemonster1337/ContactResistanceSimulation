@@ -10,7 +10,6 @@ from scipy.interpolate import griddata
 import plotly.graph_objects as go
 
 
-
 def create_surfacetopo(mdb, res, area, surface_params):
 
     r1 = surface_params['r1 [µm]']

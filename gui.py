@@ -5,7 +5,7 @@ from scipy.interpolate import griddata
 import plotly.express as px
 
 def overview(res, surface, surface_peaks, gdl, gdl_peaks, mcs, ecr, z_dis, zlim=50):
-    fig = make_subplots(rows=2, cols=3, vertical_spacing=0.15,
+    fig = make_subplots(rows=2, cols=3, vertical_spacing=0.25,
                         subplot_titles=('surface-2D', 'fibers-2D', 'MCS', 'surface-3D', 'fibers-3D', 'ECR'),
                         specs=[[{'type': 'scatter'}, {'type': 'scatter'}, {'type': 'scatter'}],
                                [{'type': 'surface'}, {'type': 'surface'}, {'type': 'scatter'}]
@@ -100,12 +100,13 @@ def overview(res, surface, surface_peaks, gdl, gdl_peaks, mcs, ecr, z_dis, zlim=
                       zaxis=dict(nticks=4, range=[0, zlim]), row=2, col=2)
 
     # update layout of complete figure
-    fig.update_layout(height=600, width=1000, showlegend=False,
-                      coloraxis_colorbar_x=-0.2,
+    fig.update_layout(height=580, width=970, showlegend=False,
+                      # coloraxis_colorbar_x=-0.2,
                       coloraxis_colorbar_thickness=20,
+                      plot_bgcolor='rgb(100, 100, 100)',
+                      paper_bgcolor='rgb(100, 100, 100)',
                       # coloraxis_colorbar_len=0.5,
                       # coloraxis=dict(colorscale='Reds')
                       )
-    fig.show()
 
     return fig
